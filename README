@@ -1,0 +1,29 @@
+This is a Racket implementation of Conway's Game of Life:
+
+http://en.wikipedia.org/wiki/Conway's_Game_of_Life
+
+The algorithm is very simple -- on each step, compute a live-neighbor count for each cell and update its "liveness" state accordingly.  The universe is double-buffered, so writes in one loop iteration don't affect subsequent ones.  The loop itself is parallelized (via futures) using static scheduling, where each thread gets an equal-sized chunk of rows to work on.  
+
+This program requires a working Racket installation.  Racket binaries for all major platforms can be obtained here:
+
+http://racket-lang.org
+
+To run the simulation (in a shell):
+
+racket run.rkt
+
+The default parameters run a 512x512 glider gun universe, which runs at about 30fps on an 8-core Macbook.
+
+Several parameters can be changed via command-line switches:
+
+racket run.rkt -n <universe size = 512> -u <start universe = glider-gun> -j <number of threads = no. of processors in the machine>
+
+A single step execution can be visualized using the parallel profiler I wrote for Racket by doing the following:
+
+racket profile-it.rkt
+
+
+SOURCE LAYOUT
+-------------
+
+The main harness, which contains the code for the window/GUI display, is in run.rkt.  The step code is in step-core.rkt.  Various helpers for game-related stuff are in game-common.rkt.  The idea is that the 'step' strategy is pluggable -- we can replace 'step-core.rkt' with some other module that uses a different strategy, and just call that one from run.rkt without changing the rest of the source.
